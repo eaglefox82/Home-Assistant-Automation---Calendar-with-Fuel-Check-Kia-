@@ -1,0 +1,107 @@
+type: markdown
+content: >-
+  {# --- CONFIGURATION --- #}
+
+  {% set calendar = 'calendar.your_calendar' %} #<-- Update to your calendar
+
+  {% set waze = 'sensor.waze_travel_time' %}
+
+  {% set phone = 'device_tracker.you.phone' %} #<-- Update to your phone
+
+  {% set kia_range = states('sensor.tasman_total_driving_range') | float(0) %}
+
+
+  {# --- DATA EXTRACTION --- #}
+
+  {% set event_name = state_attr(calendar, 'message') %}
+
+  {% set desc = state_attr(calendar, 'description') | default('', true) %}
+
+  {% set is_transit = 'Public Transport' in desc %}
+
+  {% set dest = state_attr(calendar, 'location') %}
+
+  {% set dist = state_attr(waze, 'distance') | float(0) | round(1) %}
+
+  {% set travel_mins = states(waze) | int(0) %}
+
+  {% set event_time = state_attr(calendar, 'start_time') %}
+
+
+  {# --- CALCULATIONS --- #}
+
+  {% set needs_fuel = (kia_range < (dist + 60)) if not is_transit else false %}
+
+  {% set fuel_buffer = 15 if needs_fuel else 0 %}
+
+  {% set leave_at_ts = as_timestamp(event_time, 0) - (travel_mins * 60) -
+  (fuel_buffer * 60) %}
+
+  {% set now_ts = as_timestamp(now()) %}
+
+  {% set countdown_mins = ((leave_at_ts - now_ts) / 60) | int %}
+
+  {% set is_late = now_ts > leave_at_ts %}
+
+
+  {# --- FORMATTING LOGIC --- #}
+
+  {% if travel_mins >= 60 %}
+    {% set travel_str = (travel_mins // 60) ~ "h " ~ (travel_mins % 60) ~ "m" %}
+  {% else %}
+    {% set travel_str = travel_mins ~ " mins" %}
+  {% endif %}
+
+
+  {% if countdown_mins >= 60 %}
+    {% set leave_countdown = (countdown_mins // 60) ~ "h " ~ (countdown_mins % 60) ~ "m" %}
+  {% elif countdown_mins > 0 %}
+    {% set leave_countdown = countdown_mins ~ " mins" %}
+  {% else %}
+    {% set leave_countdown = "Now" %}
+  {% endif %}
+
+
+  {# --- DISPLAY --- #}
+
+  ## {{ '🚆' if is_transit else '🚗' }} {{ event_name if event_name else 'No
+  Upcoming Event' }}
+
+
+  **Distance:** {{ dist }} km
+
+  {% if not is_transit %}
+
+  **Travel Time:** {{ travel_str }}
+
+  **Kia Range:** {{ kia_range | round(0) }} km
+
+  **Fuel Stop:** {{ '⚠️ Required (+15m)' if needs_fuel else '✅ Not Required' }}
+
+  {% else %}
+
+  > 🚆 **Public Transport Mode**
+
+  > 📱 **TripView:** [Android
+  App](https://play.google.com/store/apps/details?id=com.grofsoft.tripview.free)
+  | [Web Timetable](https://transportnsw.info/trip)  #<--- Update to App Store Line for iOS
+
+  > *Check for Richmond line or Metro delays before leaving.*  #<-- This is my local lines, you can remove
+
+  {% endif %}
+
+
+  ---
+
+  **Leave By:** {% if leave_at_ts > 0 %}{% if is_late %}<span
+  style="color:#ff4444">**{{ leave_at_ts | timestamp_custom('%I:%M %p') }}
+  (LATE)**</span>{% else %}**{{ leave_at_ts | timestamp_custom('%I:%M %p')
+  }}**{% endif %}{% else %}*Ready for next trip*{% endif %}
+
+
+  **Leave In:** {{ leave_countdown }}
+
+
+  **Event Starts:** {{ as_timestamp(event_time, 0) | timestamp_custom('%I:%M
+  %p') }}
+title: Next Event Travel Summary
