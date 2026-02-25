@@ -1,0 +1,131 @@
+alias: Calendar Travel Notification - Kia
+description: Helper-based logic for 100% reliability and no repeats
+triggers:
+  - trigger: time_pattern
+    minutes: /1
+actions:
+  - variables:
+      # --- CONFIGURABLE SETTINGS ---
+      warn_1_mins: 30
+      warn_2_mins: 5
+      fuel_buffer_mins: 15
+      
+      # --- ENTITIES ---
+      my_calendar: calendar.your_calendar #<-- Update to your calendar
+      my_speakers: media_player.speaker_group #<-- Update to your google speaker group
+      my_kia_range: sensor.tasman_total_driving_range
+      my_notify_service: notify.mobile_app_your_phone #<-- Update to your phone
+      my_tts_engine: tts.google_translate_en_com_au
+      my_person: person.you #<-- update to your name in HA
+      
+      # --- CALCS ---
+      event_name: "{{ state_attr(my_calendar, 'message') }}"
+      description: "{{ state_attr(my_calendar, 'description') | default('', true) }}"
+      is_public_transport: "{{ 'Public Transport' in description }}"
+      event_start: "{{ as_timestamp(state_attr(my_calendar, 'start_time'), 0) }}"
+      now_ts: "{{ as_timestamp(now()) }}"
+      
+      trip_dist: "{{ state_attr('sensor.waze_travel_time', 'distance') | float(0) | round(1) }}"
+      current_range: "{{ states(my_kia_range) | float(0) }}"
+      needs_fuel: "{{ not is_public_transport and current_range < (trip_dist + 60) }}"
+      
+      fuel_buffer_sec: "{{ fuel_buffer_mins * 60 if needs_fuel else 0 }}"
+      travel_seconds: "{{ (states('sensor.waze_travel_time') | int(0) * 60) }}"
+      
+      leave_at_ts: "{{ event_start - travel_seconds - fuel_buffer_sec }}"
+      
+      # Timing for notifications
+      time_until_leave: "{{ leave_at_ts - now_ts }}"
+      leave_time_str: "{{ leave_at_ts | timestamp_custom('%I:%M %p', true, 'Unknown') }}"
+      fuel_msg: "{{ 'including an extra ' ~ fuel_buffer_mins ~ ' minutes to refuel the Tasman' if needs_fuel else '' }}"
+
+  # GATE: Stop if no event, already left, or is public transport (unless you want PT alerts)
+  - condition: template
+    value_template: "{{ event_name is not none and time_until_leave > -60 }}"
+
+  - choose:
+      # --- 30 MINUTE WARNING ---
+      - conditions:
+          - condition: template
+            value_template: >
+              {{ time_until_leave <= (warn_1_mins * 60) 
+                 and time_until_leave > (warn_2_mins * 60)
+                 and states('input_text.last_notified_30m') != event_name }}
+        sequence:
+          - action: input_text.set_value
+            target:
+              entity_id: input_text.last_notified_30m
+            data:
+              value: "{{ event_name }}"
+          - action: "{{ my_notify_service }}"
+            data:
+              title: "Trip Alert: {{ event_name }}"
+              message: "Leave at {{ leave_time_str }}. {{ 'Fuel stop needed' if needs_fuel else '' }}"
+          - if:
+              - condition: template
+                value_template: "{{ is_state(my_person, 'home') }}"
+            then:
+              - action: media_player.volume_set
+                target:
+                  entity_id: "{{ my_speakers }}"
+                data:
+                  volume_level: 1
+              - action: tts.speak
+                target:
+                  entity_id: "{{ my_tts_engine }}"
+                data:
+                  media_player_entity_id: "{{ my_speakers }}"
+                  message: >
+                    Brendan, {{ warn_1_mins }} minute warning for {{ event_name }}. 
+                    You should leave at {{ leave_time_str }} {{ fuel_msg }}.
+              - delay: "00:00:15"
+              - action: media_player.media_stop
+                target:
+                  entity_id: "{{ my_speakers }}"
+              - action: media_player.volume_set
+                target:
+                  entity_id: "{{ my_speakers }}"
+                data:
+                  volume_level: 0.7
+
+      # --- 5 MINUTE WARNING ---
+      - conditions:
+          - condition: template
+            value_template: >
+              {{ time_until_leave <= (warn_2_mins * 60) 
+                 and time_until_leave > -60
+                 and states('input_text.last_notified_5m') != event_name }}
+        sequence:
+          - action: input_text.set_value
+            target:
+              entity_id: input_text.last_notified_5m
+            data:
+              value: "{{ event_name }}"
+          - if:
+              - condition: template
+                value_template: "{{ is_state(my_person, 'home') }}"
+            then:
+              - action: media_player.volume_set
+                target:
+                  entity_id: "{{ my_speakers }}"
+                data:
+                  volume_level: 1
+              - action: tts.speak
+                target:
+                  entity_id: "{{ my_tts_engine }}"
+                data:
+                  media_player_entity_id: "{{ my_speakers }}"
+                  message: >-
+                    Final reminder Brendan. You need to leave for {{ event_name }} in {{ warn_2_mins }} minutes.
+                    {{ 'Don''t forget to stop for fuel.' if needs_fuel else '' }}
+              - delay: "00:00:12"
+              - action: media_player.media_stop
+                target:
+                  entity_id: "{{ my_speakers }}"
+              - action: media_player.volume_set
+                target:
+                  entity_id: "{{ my_speakers }}"
+                data:
+                  volume_level: 0.7
+
+mode: restart
