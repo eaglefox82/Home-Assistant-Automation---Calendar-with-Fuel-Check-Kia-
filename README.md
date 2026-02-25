@@ -73,19 +73,19 @@ Copy the code from the ```automation.ymal``` file and paste - Don't download and
 
 There are a couple of updates required in the script
 
-There is the following
+There is the following which require you update
 
 ```actions:
-  - variables:
-      warn_1_mins: 30
-      warn_2_mins: 5
-      fuel_buffer_mins: 15
-      my_calendar: your_calendar
-      my_speakers: media_player.speaker_group
-      my_kia_range: sensor.tasman_total_driving_range
-      my_notify_service: notify.mobile_app_your_mobile
-      my_tts_engine: tts.google_translate_en_com_au
-      my_person: person.you
+ - variables:
+      warn_1_mins: 30   #<-- Sets the Time Prior to the first warning - default is 30 mins
+      warn_2_mins: 5 #<-- Sets the time prior to the 2nd warning - default is 5 mins
+      fuel_buffer_mins: 15 #<-- Sets the fuel time buffer - the time added to travel time to add fuel - default is 15 mins
+      my_calendar: your_calendar #<-- You Calendar Entires
+      my_speakers: media_player.speaker_group #<-- Google Home speaker group you wish to play the notification on
+      my_kia_range: sensor.tasman_total_driving_range #<-- Double check this, this is the sensor for total driving range I had for my Tasman (will be different for other models)
+      my_notify_service: notify.mobile_app_your_mobile #<-- change your_mobile to the phone listed in devices
+      my_tts_engine: tts.google_translate_en_com_au #<-- This is Australian, again check the cast sensors
+      my_person: person.you #<-- Update you to your name in Home Assistant
 ```
 
-
+Note: If you add "Public Transport" to the desciption of your Calendar entry. The driving range is not calucated
