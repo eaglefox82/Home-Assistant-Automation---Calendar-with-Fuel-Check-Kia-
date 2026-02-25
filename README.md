@@ -46,7 +46,7 @@ Now to install the the required plugins: Waze Travel Time, Hyundai/Kia Connect. 
 
 After downloading, you will need to add the integrations from *Settings -> Devices and Services -> Add integration* Search and add with the settings below
 
-#### Waze Travel Time
+### Waze Travel Time
 Origin = Sensor.your_phone_geocoded_location - Check your device in Home Assistant to grab sensor name
 Destination = sensor.next_event_location - This is the name from the sensor we added to the ```configuration.ymal``` file
 Region = Australia
@@ -62,4 +62,15 @@ This integration gives use all the information we see in the app, plus we can tr
 No major setup here, as should auto discover on your network
 
 Please check your entires for this integrations which makes the next points easier
+
+## Automation
+-----
+Click on the following:
+Settings -> Automations & Scenes -> Create automation
+Click on the 3 dots at the top right and select "Edit in YAML"
+This will open the code view.
+Copy the code from the ```automation.ymal``` file and paste - Don't download and upload, just open, copy and paste
+
+There are a couple of updates required in the script
+
 
