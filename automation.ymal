@@ -1,0 +1,118 @@
+alias: Calendar Travel Notification - Kia
+description: Hybrid Trigger - Fixed 5min Warning Logic
+triggers:
+  - trigger: calendar
+    event: start
+    offset: "-03:00:00"
+    entity_id: calendar.your_calendar
+    id: calendar_offset
+  - minutes: /1
+    trigger: time_pattern
+    id: pulse_check
+actions:
+  - variables:
+      warn_1_mins: 30
+      warn_2_mins: 5
+      fuel_buffer_mins: 15
+      my_calendar: your_calendar
+      my_speakers: media_player.speaker_group
+      my_kia_range: sensor.tasman_total_driving_range
+      my_notify_service: notify.mobile_app_your_mobile
+      my_tts_engine: tts.google_translate_en_com_au
+      my_person: person.you
+      event_name: "{{ state_attr(my_calendar, 'message') }}"
+      description: "{{ state_attr(my_calendar, 'description') | default('', true) }}"
+      is_public_transport: "{{ 'Public Transport' in description }}"
+      event_start: "{{ as_timestamp(state_attr(my_calendar, 'start_time'), 0) }}"
+      now_ts: "{{ as_timestamp(now()) }}"
+      trip_dist: >-
+        {{ state_attr('sensor.waze_travel_time', 'distance') | float(0) |
+        round(1) }}
+      current_range: "{{ states(my_kia_range) | float(0) }}"
+      needs_fuel: "{{ not is_public_transport and current_range < (trip_dist + 60) }}"
+      fuel_buffer_sec: "{{ fuel_buffer_mins * 60 if needs_fuel else 0 }}"
+      travel_seconds: "{{ (states('sensor.waze_travel_time') | int(0) * 60) }}"
+      leave_at_ts: "{{ event_start - travel_seconds - fuel_buffer_sec }}"
+      warn_1_ts: "{{ leave_at_ts - (warn_1_mins * 60) }}"
+      warn_2_ts: "{{ leave_at_ts - (warn_2_mins * 60) }}"
+      leave_time_str: "{{ leave_at_ts | timestamp_custom('%I:%M %p', true, 'Unknown') }}"
+      fuel_msg: >-
+        {{ 'including an extra ' ~ fuel_buffer_mins ~ ' minutes to refuel the
+        Tasman' if needs_fuel else '' }}
+      last_ran: "{{ as_timestamp(state_attr(this.entity_id, 'last_triggered'), 0) }}"
+  - condition: template
+    value_template: "{{ event_name is not none and now_ts < (leave_at_ts + 60) }}"
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: >-
+              {{ warn_1_ts <= now_ts < (warn_1_ts + 60) and (now_ts - last_ran)
+              > 120 }}
+        sequence:
+          - action: "{{ my_notify_service }}"
+            data:
+              title: "Trip Alert: {{ event_name }}"
+              message: >-
+                Leave at {{ leave_time_str }}. {{ 'Fuel stop needed' if
+                needs_fuel else '' }}
+          - if:
+              - condition: template
+                value_template: "{{ is_state(my_person, 'home') }}"
+            then:
+              - action: media_player.volume_set
+                target:
+                  entity_id: "{{ my_speakers }}"
+                data:
+                  volume_level: 1
+              - action: tts.speak
+                target:
+                  entity_id: "{{ my_tts_engine }}"
+                data:
+                  media_player_entity_id: "{{ my_speakers }}"
+                  message: >
+                    Attention, {{ warn_1_mins }} minute warning for {{ event_name
+                    }}.  You should leave at {{ leave_time_str }} {{ fuel_msg
+                    }}.
+              - delay: "00:00:15"
+              - action: media_player.media_stop
+                target:
+                  entity_id: "{{ my_speakers }}"
+              - action: media_player.volume_set
+                target:
+                  entity_id: "{{ my_speakers }}"
+                data:
+                  volume_level: 0.7
+      - conditions:
+          - condition: template
+            value_template: >-
+              {{ warn_2_ts <= now_ts < (warn_2_ts + 60) and (now_ts - last_ran)
+              > 120 }}
+        sequence:
+          - if:
+              - condition: template
+                value_template: "{{ is_state(my_person, 'home') }}"
+            then:
+              - action: media_player.volume_set
+                target:
+                  entity_id: "{{ my_speakers }}"
+                data:
+                  volume_level: 1
+              - action: tts.speak
+                target:
+                  entity_id: "{{ my_tts_engine }}"
+                data:
+                  media_player_entity_id: "{{ my_speakers }}"
+                  message: >-
+                    Final reminder. You need to leave for {{ event_name
+                    }} in {{ warn_2_mins }} minutes. {{ 'Don''t forget to stop
+                    for fuel.' if needs_fuel else '' }}
+              - delay: "00:00:12"
+              - action: media_player.media_stop
+                target:
+                  entity_id: "{{ my_speakers }}"
+              - action: media_player.volume_set
+                target:
+                  entity_id: "{{ my_speakers }}"
+                data:
+                  volume_level: 0.7
+mode: restart
