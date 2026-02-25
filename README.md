@@ -97,3 +97,24 @@ There is the following which require you update
 ```
 
 Note: If you add "Public Transport" to the desciption of your Calendar entry. The driving range is not calucated
+
+
+
+
+
+
+
+
+## Home Assistant Dashboard Card
+
+I also have a dashboard card to display this information
+You can copy and modify the code as you see if, please note I use Android so the links are Android based. Easy to update for iOS
+
+<img width="439" height="434" alt="{E7557E40-FD15-479E-A837-143F82AB83B4}" src="https://github.com/user-attachments/assets/ae3bbffa-9d73-4d74-823d-6cb8debe8797" />
+
+Note if you add public transport to the description of your calendar event you get the following
+
+<img width="420" height="388" alt="{AC988353-E7CA-48F0-B746-5AD166081B51}" src="https://github.com/user-attachments/assets/365367ba-54a0-47bb-900d-712bed171389" />
+Will take the Leave By and Leave In options out soon
+
+
