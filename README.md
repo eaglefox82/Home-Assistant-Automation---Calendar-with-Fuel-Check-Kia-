@@ -73,4 +73,19 @@ Copy the code from the ```automation.ymal``` file and paste - Don't download and
 
 There are a couple of updates required in the script
 
+There is the following
+
+```actions:
+  - variables:
+      warn_1_mins: 30
+      warn_2_mins: 5
+      fuel_buffer_mins: 15
+      my_calendar: your_calendar
+      my_speakers: media_player.speaker_group
+      my_kia_range: sensor.tasman_total_driving_range
+      my_notify_service: notify.mobile_app_your_mobile
+      my_tts_engine: tts.google_translate_en_com_au
+      my_person: person.you
+```
+
 
