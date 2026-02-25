@@ -112,7 +112,7 @@ You can copy and modify the code as you see if, please note I use Android so the
 
 <img width="439" height="434" alt="{E7557E40-FD15-479E-A837-143F82AB83B4}" src="https://github.com/user-attachments/assets/ae3bbffa-9d73-4d74-823d-6cb8debe8797" />
 
-Note if you add public transport to the description of your calendar event you get the following:
+Note if you add Public Transport to the description of your calendar event you get the following:
 
 <img width="287" height="389" alt="{DABDF474-AA86-420D-8732-67E1B4AC40B4}" src="https://github.com/user-attachments/assets/7f3e77e2-649b-4d33-9ae5-7ccbe0c6443f" />
 
