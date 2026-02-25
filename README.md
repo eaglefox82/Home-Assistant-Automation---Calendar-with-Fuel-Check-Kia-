@@ -37,8 +37,9 @@ template:
         attributes:
           is_calendar_event: "{{ state_attr('calendar.you_calendar', 'location') is not none }}"
 ```
-*Update* calendar.your_calendar to your calendar entry in Home Assistant:- Example if your calendar is abc123@gmail.com you would see your calendar entry as calendar.abc123_gmail_com
-*Update* home_location to your current address or even suburb.
+**_Update_** calendar.your_calendar to your calendar entry in Home Assistant:- Example if your calendar is abc123@gmail.com you would see your calendar entry as calendar.abc123_gmail_com
+
+**_Update_** home_location to your current address or even suburb.
 What this does is creates a sensor which checks your calendar for the next event and grabs the location or falls back to your home if not location
 
 Now to install the the required plugins: Waze Travel Time, Hyundai/Kia Connect. Both of these are downloaded via HACS and the Google Cast 
