@@ -112,9 +112,10 @@ You can copy and modify the code as you see if, please note I use Android so the
 
 <img width="439" height="434" alt="{E7557E40-FD15-479E-A837-143F82AB83B4}" src="https://github.com/user-attachments/assets/ae3bbffa-9d73-4d74-823d-6cb8debe8797" />
 
-Note if you add public transport to the description of your calendar event you get the following
+Note if you add public transport to the description of your calendar event you get the following:
+<img width="287" height="389" alt="{DABDF474-AA86-420D-8732-67E1B4AC40B4}" src="https://github.com/user-attachments/assets/7f3e77e2-649b-4d33-9ae5-7ccbe0c6443f" />
 
-<img width="420" height="388" alt="{AC988353-E7CA-48F0-B746-5AD166081B51}" src="https://github.com/user-attachments/assets/365367ba-54a0-47bb-900d-712bed171389" />
-Will take the Leave By and Leave In options out soon
+
+
 
 
