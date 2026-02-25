@@ -5,6 +5,13 @@ This is a guide for setting up Home Assistant for triggering notifications based
 
 This guide also assumes you know how to edit your ```configuation.ymal``` file
 
+## Automation Overview
+======
+This automation looks at the location of your next event in your calendar. Then uses your phone's location to calucate the travel time including traffic to arrive in time.
+The automation then looks at the Driving range of your Kia (Mine is a Tasman) and sees if you have enought fuel including a buffer of 60km to complete the trip
+
+If you require fuel a buffer is added to the trip time (default is 15mins) and then 30mins prior to you needing to leave you will recieve a notification on your phone and via your google speakers, as well as be told if you need fuel or not
+
 ***
 ## Requirements
 -----
@@ -15,6 +22,7 @@ This guide also assumes you know how to edit your ```configuation.ymal``` file
 * Home assistant app installed on your phone
 * Your Phone has been assigned to you under the Persons
 * Google Nest Speakers setup in your Google Home account - Please google for other types
+* * Best to have a group will all speakers called whole house or whole home if you want to broadcast on all of them
 
 ***
 ## Setup
