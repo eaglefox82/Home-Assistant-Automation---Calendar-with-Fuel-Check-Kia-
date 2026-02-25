@@ -6,7 +6,7 @@ This is a guide for setting up Home Assistant for triggering notifications based
 This guide also assumes you know how to edit your ```configuation.ymal``` file
 
 ## Automation Overview
-======
+-----
 This automation looks at the location of your next event in your calendar. Then uses your phone's location to calucate the travel time including traffic to arrive in time.
 The automation then looks at the Driving range of your Kia (Mine is a Tasman) and sees if you have enought fuel including a buffer of 60km to complete the trip
 
