@@ -93,6 +93,8 @@ content: >-
 
   ---
 
+{% if not is_transit %}
+
   **Leave By:** {% if leave_at_ts > 0 %}{% if is_late %}<span
   style="color:#ff4444">**{{ leave_at_ts | timestamp_custom('%I:%M %p') }}
   (LATE)**</span>{% else %}**{{ leave_at_ts | timestamp_custom('%I:%M %p')
@@ -101,6 +103,7 @@ content: >-
 
   **Leave In:** {{ leave_countdown }}
 
+{% endif %}
 
   **Event Starts:** {{ as_timestamp(event_time, 0) | timestamp_custom('%I:%M
   %p') }}
