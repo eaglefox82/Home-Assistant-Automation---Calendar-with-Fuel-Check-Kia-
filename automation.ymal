@@ -1,5 +1,5 @@
 alias: Calendar Travel Notification - Kia
-description: Helper-based logic for 100% reliability and no repeats
+description: This automation checks your calendar, the travel time and driving rannge of your Kia to give you a notification via Google Speakers of when to leave
 triggers:
   - trigger: time_pattern
     minutes: /1
@@ -13,7 +13,7 @@ actions:
       # --- ENTITIES ---
       my_calendar: calendar.your_calendar #<-- Update to your calendar
       my_speakers: media_player.speaker_group #<-- Update to your google speaker group
-      my_kia_range: sensor.tasman_total_driving_range
+      my_kia_range: sensor.tasman_total_driving_range #<-- My car is a Tasman, if a different model, please update
       my_notify_service: notify.mobile_app_your_phone #<-- Update to your phone
       my_tts_engine: tts.google_translate_en_com_au
       my_person: person.you #<-- update to your name in HA
@@ -76,7 +76,7 @@ actions:
                 data:
                   media_player_entity_id: "{{ my_speakers }}"
                   message: >
-                    Brendan, {{ warn_1_mins }} minute warning for {{ event_name }}. 
+                    Attention, {{ warn_1_mins }} minute warning for {{ event_name }}. 
                     You should leave at {{ leave_time_str }} {{ fuel_msg }}.
               - delay: "00:00:15"
               - action: media_player.media_stop
@@ -116,7 +116,7 @@ actions:
                 data:
                   media_player_entity_id: "{{ my_speakers }}"
                   message: >-
-                    Final reminder Brendan. You need to leave for {{ event_name }} in {{ warn_2_mins }} minutes.
+                    Final reminder. You need to leave for {{ event_name }} in {{ warn_2_mins }} minutes.
                     {{ 'Don''t forget to stop for fuel.' if needs_fuel else '' }}
               - delay: "00:00:12"
               - action: media_player.media_stop
